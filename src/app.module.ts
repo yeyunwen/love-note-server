@@ -1,10 +1,17 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { NoteModule } from './note/note.module';
+import { ConfigModule } from '@nestjs/config';
+import GLOBAL_CONFIG from './common/config';
 
 @Module({
-  imports: [NoteModule],
+  imports: [
+    ConfigModule.forRoot({
+      ignoreEnvFile: true,
+      isGlobal: true,
+      load: [() => GLOBAL_CONFIG],
+    }),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

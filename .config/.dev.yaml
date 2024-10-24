@@ -1,0 +1,2 @@
+SERVER_CONFIG:
+  PORT: 9315 # 应用服务端口
