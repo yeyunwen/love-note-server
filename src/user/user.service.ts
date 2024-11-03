@@ -11,10 +11,15 @@ export class UserService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
   async create(createUserDto: CreateUserDto) {
+    const hasUser = await this.userRepository.findOne({
+      where: { username: createUserDto.username },
+    });
+    if (hasUser) {
+      throw new Error('用户已存在');
+    }
     const user = this.userRepository.create(createUserDto);
-    const result = await this.userRepository.save(user);
-
-    return result;
+    await this.userRepository.save(user);
+    return user;
   }
 
   findAll() {
