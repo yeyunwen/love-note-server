@@ -10,6 +10,8 @@ export const getEnv = (): Env => {
   return process.env.RUNNING_ENV as Env;
 };
 
+export const isDev = getEnv() === 'dev';
+
 // 读取项目配置
 const getConfig = () => {
   const env = getEnv();

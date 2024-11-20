@@ -4,9 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
-import GLOBAL_CONFIG from './common/config';
-
-console.log(__dirname);
+import GLOBAL_CONFIG, { isDev } from './common/config';
 
 @Module({
   imports: [
@@ -22,8 +20,9 @@ console.log(__dirname);
       username: GLOBAL_CONFIG.MYSQL_CONFIG.USER,
       password: GLOBAL_CONFIG.MYSQL_CONFIG.PASSWORD,
       database: GLOBAL_CONFIG.MYSQL_CONFIG.DATABASE,
+      logging: isDev,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+      synchronize: isDev,
     }),
     UserModule,
   ],
