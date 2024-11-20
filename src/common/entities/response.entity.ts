@@ -11,7 +11,7 @@ export class BaseResponse<T = null> {
     default: null,
     description: '接口数据',
   })
-  data: T;
+  data: T = null;
 
   @ApiProperty({
     default: 'ok',
