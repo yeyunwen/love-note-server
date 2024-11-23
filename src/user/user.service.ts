@@ -3,29 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { hash, compare } from 'bcrypt';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
-  async create(createUserDto: CreateUserDto) {
-    const hasUser = await this.userRepository.findOne({
-      where: { username: createUserDto.username },
-    });
-    if (hasUser) {
-      throw new Error('用户已存在');
-    }
 
-    const user = this.userRepository.create({
-      ...createUserDto,
-      uid: this.generateUid(),
-    });
-    await this.userRepository.save(user);
-    return user;
-  }
   private generateUid(): string {
     const uid = uuidv4();
     const numericUid = uid
@@ -34,6 +20,29 @@ export class UserService {
       .map((char) => char.charCodeAt(0))
       .join('');
     return numericUid.slice(0, 12);
+  }
+  private async hashPassword(password: string) {
+    return await hash(password, 10);
+  }
+  static validatePassword(password: string, hashedPassword: string) {
+    return compare(password, hashedPassword);
+  }
+
+  async create(createUserDto: CreateUserDto) {
+    const hasUser = await this.userRepository.findOne({
+      where: { username: createUserDto.username },
+    });
+    if (hasUser) {
+      throw new HttpException('用户已存在', 200);
+    }
+    const password = await this.hashPassword(createUserDto.password);
+    const user = this.userRepository.create({
+      ...createUserDto,
+      password,
+      uid: this.generateUid(),
+    });
+    await this.userRepository.save(user);
+    return user;
   }
 
   async bindLover(userUid: string, loverUid: string): Promise<void> {
@@ -52,8 +61,8 @@ export class UserService {
     if (user.lover || lover.lover) {
       throw new HttpException('用户已有恋人', 200);
     }
-    user.loverId = lover.uid;
-    lover.loverId = user.uid;
+    user.loverUid = lover.uid;
+    lover.loverUid = user.uid;
     await this.userRepository.manager.transaction(
       async (transactionalEntityManager) => {
         await transactionalEntityManager.save(user);
@@ -66,20 +75,20 @@ export class UserService {
     const user = await this.userRepository.findOne({
       where: { uid: userUid },
     });
-    if (!user || !user.loverId) {
+    if (!user || !user.loverUid) {
       throw new HttpException('用户没有恋人', 200);
     }
 
     const partner = await this.userRepository.findOne({
-      where: { uid: user.loverId },
+      where: { uid: user.loverUid },
     });
     if (!partner) {
       throw new HttpException('恋人不存在', 200);
     }
 
     // 解除双方绑定
-    user.loverId = null;
-    partner.loverId = null;
+    user.loverUid = null;
+    partner.loverUid = null;
 
     // 使用事务保存
     await this.userRepository.manager.transaction(
@@ -94,16 +103,9 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    updateUserDto;
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  findOne(username: string) {
+    return this.userRepository.findOne({
+      where: { username },
+    });
   }
 }

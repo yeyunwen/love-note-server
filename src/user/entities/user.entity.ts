@@ -1,5 +1,4 @@
 import {
-  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
@@ -8,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { hash } from 'bcrypt';
+
 import { UserGender } from '../enum';
 
 @Entity()
@@ -37,17 +36,12 @@ export class User {
   @JoinColumn({ name: 'lover_uid' })
   lover: User;
 
-  @Column({ nullable: true, comment: '恋人Id' })
-  loverId: string;
+  @Column({ nullable: true, comment: '恋人uid' })
+  loverUid: string;
 
   @CreateDateColumn({ comment: '创建时间' })
   createdTime: Date;
 
   @UpdateDateColumn({ comment: '更新时间' })
   updatedTime: Date;
-
-  @BeforeInsert()
-  async hashPassword() {
-    this.password = await hash(this.password, 10);
-  }
 }

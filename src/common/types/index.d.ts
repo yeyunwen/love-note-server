@@ -20,6 +20,18 @@ export interface _Config {
     /** 数据库名称 */
     DATABASE: string;
   };
+
+  AUTH_CONFIG: {
+    /** JWT 密钥 */
+    JWT_SECRET: string;
+    /** JWT 过期时间 */
+    JWT_EXPIRES_IN: string;
+  };
 }
 
 export type AppConfig = DeepReadonly<_Config>;
+
+export type JwtPayload = {
+  userId: number;
+  username: string;
+};
