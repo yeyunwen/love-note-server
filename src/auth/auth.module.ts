@@ -7,6 +7,8 @@ import { UserModule } from '../user/user.module';
 import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
 import GLOBAL_CONFIG from '../common/config';
+import { EmailService } from '../common/email/email.service';
+import { RedisModule } from '../common/redis/redis.module';
 
 @Module({
   imports: [
@@ -16,8 +18,9 @@ import GLOBAL_CONFIG from '../common/config';
       secret: GLOBAL_CONFIG.AUTH_CONFIG.JWT_SECRET,
       signOptions: { expiresIn: GLOBAL_CONFIG.AUTH_CONFIG.JWT_EXPIRES_IN },
     }),
+    RedisModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, EmailService],
 })
 export class AuthModule {}

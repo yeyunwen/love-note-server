@@ -6,6 +6,7 @@ import GLOBAL_CONFIG, { isDev } from './common/config';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/jwt.guard';
+import { RedisModule } from './common/redis/redis.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { JwtAuthGuard } from './auth/jwt.guard';
     }),
     UserModule,
     AuthModule,
+    RedisModule,
   ],
   providers: [
     {
