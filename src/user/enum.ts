@@ -3,7 +3,3 @@ export enum UserGender {
   男 = 1,
   女 = 2,
 }
-
-export enum UserRegisterType {
-  邮箱 = 'EMAIL',
-}

@@ -27,20 +27,6 @@ export interface _Config {
     /** JWT 过期时间 */
     JWT_EXPIRES_IN: string;
   };
-
-  EMAIL_CONFIG: {
-    /** 邮箱 */
-    USER: string;
-    /** 邮箱授权码 */
-    PASS: string;
-  };
-
-  REDIS_CONFIG: {
-    /** Redis 地址 */
-    HOST: string;
-    /** Redis 端口 */
-    PORT: number;
-  };
 }
 
 export type AppConfig = DeepReadonly<_Config>;

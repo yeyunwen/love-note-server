@@ -18,9 +18,6 @@ export class User {
   @Column({ unique: true, comment: 'uid' })
   uid: string;
 
-  @Column({ unique: true, comment: '邮箱' })
-  email: string;
-
   @Column({ length: 60, comment: '用户名' })
   username: string;
 
@@ -39,8 +36,8 @@ export class User {
   @JoinColumn({ name: 'lover_uid' })
   lover: User;
 
-  // @Column({ nullable: true, comment: '恋人uid' })
-  // loverUid: string;
+  @Column({ nullable: true, comment: '恋人uid' })
+  loverUid: string;
 
   @CreateDateColumn({ comment: '创建时间' })
   createdTime: Date;

@@ -17,9 +17,3 @@ services:
       - ${MYSQL_CNF_PATH}:/etc/mysql/conf.d/my.cnf:rw
     networks:
       - backend
-  redis:
-    image: 'redis:latest'
-    ports:
-      - '${REDIS_PORT}:6379'
-    networks:
-      - backend
