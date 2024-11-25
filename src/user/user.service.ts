@@ -99,6 +99,13 @@ export class UserService {
     return this.userRepository.findOne({ where: { email } });
   }
 
+  async validateUserByEmail(email: string, password: string) {
+    const user = await this.findByEmail(email);
+    return user && (await UserService.validatePassword(password, user.password))
+      ? user
+      : null;
+  }
+
   // async createByEmail(createUserDto: CreateUserEmailDto) {
   //   const hasUser = await this.userRepository.findOne({
   //     where: { email: createUserDto.email },

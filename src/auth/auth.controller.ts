@@ -1,11 +1,16 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpException,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
-import { LocalAuthGuard } from './auth.guard';
-import { AuthService, SafeUserInfo } from './auth.service';
+import { AuthService } from './auth.service';
 import { Public } from '../common/decorators/public.decorator';
 import { JwtPayload } from '../common/types';
-import { LoginUsernameDto } from './dto/login-username.dto';
+import { LoginEmailDto } from './dto/login.dto';
 import { SendEmailVerifyCodeDto } from './dto/verify-code.dto';
 
 @ApiTags('认证')
@@ -16,17 +21,20 @@ export class AuthController {
     private readonly jwtService: JwtService,
   ) {}
 
-  @Post('login/username')
+  @Post('login/email')
   @ApiOperation({
-    summary: '用户名密码登录',
+    summary: '邮箱登录',
   })
-  @ApiBody({ type: LoginUsernameDto })
-  @UseGuards(LocalAuthGuard)
+  @ApiBody({ type: LoginEmailDto })
   @Public()
-  loginByUsername(@Request() req: { user: SafeUserInfo }) {
+  async loginByEmail(@Body() data: LoginEmailDto) {
+    const user = await this.authService.loginByEmail(data.email, data.password);
+    if (!user) {
+      throw new HttpException('用户名或密码错误', HttpStatus.OK);
+    }
     const token = this.jwtService.sign({
-      userId: req.user.id,
-      username: req.user.username,
+      userId: user.id,
+      username: user.username,
     } as JwtPayload);
     return { token };
   }

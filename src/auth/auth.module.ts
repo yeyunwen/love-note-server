@@ -4,7 +4,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module';
-import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
 import GLOBAL_CONFIG from '../common/config';
 import { EmailService } from '../common/email/email.service';
@@ -21,6 +20,6 @@ import { RedisModule } from '../common/redis/redis.module';
     RedisModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, EmailService],
+  providers: [AuthService, JwtStrategy, EmailService],
 })
 export class AuthModule {}

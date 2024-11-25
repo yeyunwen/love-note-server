@@ -15,17 +15,8 @@ export class AuthService {
     @Inject(REDIS_CLIENT) private redisClient: Redis,
   ) {}
 
-  async validateUser(
-    username: string,
-    password: string,
-  ): Promise<SafeUserInfo | null> {
-    const user = await this.userService.findOne(username);
-    if (user && (await UserService.validatePassword(password, user.password))) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...result } = user; // 去除 password
-      return result;
-    }
-    return null;
+  async loginByEmail(email: string, password: string) {
+    return await this.userService.validateUserByEmail(email, password);
   }
 
   async sendEmailVerifyCode(address: string) {
