@@ -7,8 +7,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { RegisterDto } from './dto/register.dto';
 import { hash, compare } from 'bcrypt';
-import { RegisterDataMap } from './interfaces/user-register.interface';
-import { UserRegisterType } from './enum';
+import { RegisterDataMap, UserRegisterType } from './types';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';

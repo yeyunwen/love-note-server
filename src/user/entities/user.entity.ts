@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { UserGender } from '../enum';
+import { UserGender } from '../types';
 
 @Entity()
 export class User {

@@ -7,7 +7,7 @@ import {
   Length,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserGender, UserRegisterType } from '../enum';
+import { UserGender, UserRegisterType } from '../types';
 
 export class CreateUserEmailDto {
   @IsNotEmpty({ message: 'email must not be empty' })

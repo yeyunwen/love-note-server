@@ -1,5 +1,14 @@
 import { CreateUserEmailDto } from '../dto/register.dto';
-import { UserRegisterType } from '../enum';
+
+export enum UserGender {
+  未知 = 0,
+  男 = 1,
+  女 = 2,
+}
+
+export enum UserRegisterType {
+  邮箱 = 'EMAIL',
+}
 
 // 定义注册数据类型映射
 export type RegisterDataMap = {
