@@ -3,9 +3,12 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import { EmailModule } from '../common/email/email.module';
+// import { EmailRegisterStrategy } from './strategies/email-register.strategy';
+import { RedisModule } from 'src/common/redis/redis.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([User]), EmailModule, RedisModule],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],
