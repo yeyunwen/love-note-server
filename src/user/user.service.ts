@@ -1,3 +1,5 @@
+import { randomBytes, scrypt } from 'node:crypto';
+import { promisify } from 'node:util';
 import {
   BadRequestException,
   HttpException,
@@ -6,13 +8,15 @@ import {
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { RegisterDto } from './dto/register.dto';
-import { hash, compare } from 'bcrypt';
 import { RegisterDataMap, UserRegisterType } from './types';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { REDIS_CLIENT } from 'src/common/redis/redis.module';
 import Redis from 'ioredis';
+
+// 将 scrypt 转换为 Promise 版本
+const scryptAsync = promisify(scrypt);
 
 @Injectable()
 export class UserService {
@@ -37,15 +41,19 @@ export class UserService {
       .join('');
     return numericUid.slice(0, 12);
   }
-  private async hashPassword(password: string) {
-    return await hash(password, 10);
-  }
   private async generateDefaultUsername() {
     const randomNumber = Math.floor(Math.random() * 100000);
     return `user_${randomNumber}`;
   }
-  static validatePassword(password: string, hashedPassword: string) {
-    return compare(password, hashedPassword);
+  private async hashPassword(password: string) {
+    const salt = randomBytes(16).toString('hex');
+    const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
+    return salt + ':' + derivedKey.toString('hex');
+  }
+  static async validatePassword(password: string, storedHash: string) {
+    const [salt, hash] = storedHash.split(':');
+    const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
+    return derivedKey.toString('hex') === hash;
   }
 
   async register(registerDto: RegisterDto) {
