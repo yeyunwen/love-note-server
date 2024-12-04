@@ -12,7 +12,7 @@ import { RegisterDataMap, UserRegisterType } from './types';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { REDIS_CLIENT } from 'src/common/redis/redis.module';
+import { REDIS_CLIENT } from '../common/redis/redis.module';
 import Redis from 'ioredis';
 
 // 将 scrypt 转换为 Promise 版本

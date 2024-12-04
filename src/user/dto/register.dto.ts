@@ -12,10 +12,18 @@ import { UserGender, UserRegisterType } from '../types';
 export class CreateUserEmailDto {
   @IsNotEmpty({ message: 'email must not be empty' })
   @IsEmail({}, { message: 'email must be a valid email' })
+  @ApiProperty({
+    description: '邮箱',
+    example: '1571374338@qq.com',
+  })
   email: string;
 
   @IsNotEmpty({ message: 'password must not be empty' })
   @Length(6, 12, { message: 'password length must be between 6 and 12' })
+  @ApiProperty({
+    description: '密码',
+    example: '123456',
+  })
   password: string;
 
   @IsNotEmpty({ message: 'verifyCode must not be empty' })
