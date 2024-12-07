@@ -1,13 +1,14 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Post, Body } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BindLoverDto } from './dto/bind-lover.dto';
 import { UnbindLoverDto } from './dto/unbind-lover.dto';
 import { RegisterDto } from './dto/register.dto';
-import { Public } from 'src/common/decorators/public.decorator';
+import { ApiController } from '../common/decorators/api-controller.decorator';
+import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('用户')
-@Controller('user')
+@ApiController('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -18,11 +19,6 @@ export class UserController {
     await this.userService.register(registerDto);
     return '注册成功';
   }
-
-  // async create(@Body() createUserDto: CreateUserDto) {
-  //   await this.userService.create(createUserDto);
-  //   return '创建成功';
-  // }
 
   @ApiOperation({ summary: '绑定恋人' })
   @Post('lover/bind')
