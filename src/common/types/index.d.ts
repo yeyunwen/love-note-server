@@ -41,6 +41,15 @@ export interface _Config {
     /** Redis 端口 */
     PORT: number;
   };
+
+  UPLOAD_CONFIG: {
+    /** 最大文件大小 10(MB) */
+    MAX_FILE_SIZE: number;
+    /** 最大文件数量 9 */
+    MAX_FILE_COUNT: number;
+    /** 文件存储路径 uploads */
+    DESTINATION: string;
+  };
 }
 
 export type AppConfig = DeepReadonly<_Config>;
