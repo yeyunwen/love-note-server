@@ -131,7 +131,10 @@ export class UserService {
   //   return user;
   // }
 
-  async bindLover(userUid: string, loverUid: string): Promise<void> {
+  /**
+   * 绑定恋人请求
+   */
+  async bindLoverRequest(userUid: string, loverUid: string): Promise<void> {
     if (userUid === loverUid) {
       throw new HttpException('不能绑定自己', 200);
     }
@@ -140,6 +143,7 @@ export class UserService {
     });
     const lover = await this.userRepository.findOne({
       where: { uid: loverUid },
+      relations: ['loverRequest'],
     });
     if (!user || !lover) {
       throw new HttpException('用户不存在', 200);
@@ -147,8 +151,42 @@ export class UserService {
     if (user.lover || lover.lover) {
       throw new HttpException('用户已有恋人', 200);
     }
+    if (lover.loverRequest?.uid === userUid) {
+      throw new HttpException('对方已向你发送绑定请求', 200);
+    }
+    // 设置请求状态为 pending
+    user.loverRequest = lover;
+    await this.userRepository.save(user);
+  }
+
+  /**
+   * 接受恋人请求
+   */
+  async acceptLoverRequest(userUid: string, loverUid: string): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { uid: userUid },
+    });
+    const lover = await this.userRepository.findOne({
+      where: { uid: loverUid },
+      relations: ['loverRequest'],
+    });
+    if (!user || !lover) {
+      throw new HttpException('用户不存在', 200);
+    }
+    if (lover.loverRequest?.uid !== userUid) {
+      throw new HttpException('对方没有向你发送绑定请求', 200);
+    }
+    if (user.lover) {
+      throw new HttpException('你已与其他人绑定', 200);
+    }
+    if (lover.lover) {
+      throw new HttpException('对方已与其他人绑定', 200);
+    }
+    // 双方同意绑定
     user.lover = lover;
     lover.lover = user;
+    user.loverRequest = null; // 清除请求状态
+    lover.loverRequest = null; // 清除请求状态
     await this.userRepository.manager.transaction(
       async (transactionalEntityManager) => {
         await transactionalEntityManager.save(user);
@@ -157,41 +195,38 @@ export class UserService {
     );
   }
 
-  async unbindLover(userUid: string) {
+  async unbindLover(userUid: string): Promise<void> {
     const user = await this.userRepository.findOne({
       where: { uid: userUid },
+      relations: ['lover'], // 确保加载 lover 关系
     });
+
     if (!user || !user.lover) {
-      throw new HttpException('用户没有恋人', 200);
+      throw new HttpException('用户不存在或未绑定', 200);
     }
 
-    const partner = await this.userRepository.findOne({
-      where: { uid: user.lover.uid },
-    });
-    if (!partner) {
-      throw new HttpException('恋人不存在', 200);
-    }
+    const lover = user.lover;
 
-    // 解除双方绑定
+    // 解除绑定
     user.lover = null;
-    partner.lover = null;
+    lover.lover = null;
 
-    // 使用事务保存
     await this.userRepository.manager.transaction(
       async (transactionalEntityManager) => {
         await transactionalEntityManager.save(user);
-        await transactionalEntityManager.save(partner);
+        await transactionalEntityManager.save(lover);
       },
     );
   }
 
-  findAll() {
-    return `This action returns all user`;
-  }
-
-  findOne(username: string) {
-    return this.userRepository.findOne({
-      where: { username },
+  async insertTestUser() {
+    const testUser = this.userRepository.create({
+      uid: 'test_uid',
+      email: 'test@example.com',
+      username: 'testuser',
+      password: await this.hashPassword('testpassword'),
     });
+
+    await this.userRepository.save(testUser);
   }
 }

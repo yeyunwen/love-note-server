@@ -6,6 +6,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
 
 import { UserGender } from '~/user/types';
@@ -36,12 +37,14 @@ export class User {
   gender: number;
 
   @OneToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'lover_uid' })
+  @JoinColumn({ name: 'lover_uid', referencedColumnName: 'uid' })
   lover: User;
 
-  // @Column({ nullable: true, comment: '恋人uid' })
-  // loverUid: string;
-
+  @ManyToOne(() => User, (user) => user.loverRequest, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  loverRequest: User;
   @CreateDateColumn({ comment: '创建时间' })
   createdTime: Date;
 
