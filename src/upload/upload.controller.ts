@@ -3,9 +3,10 @@ import { Post, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { UploadService } from '../upload/upload.service';
-import GLOBAL_CONFIG from '../common/config';
-import { ApiController } from '../common/decorators/api-controller.decorator';
+import { UploadService } from '~/upload/upload.service';
+import GLOBAL_CONFIG from '~/common/config';
+import { ApiController } from '~/common/decorators/api-controller.decorator';
+
 @ApiTags('文件上传')
 @ApiController('upload')
 export class UploadController {

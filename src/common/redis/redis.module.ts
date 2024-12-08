@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { RedisService } from './redis.service';
 import Redis from 'ioredis';
 import { ConfigService } from '@nestjs/config';
-import { AppConfig } from '../types';
+import { AppConfig } from '~/common/types';
 
 export const REDIS_CLIENT = 'REDIS_CLIENT';
 

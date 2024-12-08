@@ -7,7 +7,7 @@ import {
   Length,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserGender, UserRegisterType } from '../types';
+import { UserGender, UserRegisterType } from '~/user/types';
 
 export class CreateUserEmailDto {
   @IsNotEmpty({ message: 'email must not be empty' })
@@ -36,7 +36,7 @@ export class CreateUserEmailDto {
   })
   @IsOptional()
   @IsEnum(UserGender, { message: 'gender must be 0, 1 or 2' })
-  gender?: number;
+  gender?: UserGender;
 }
 
 export class RegisterDto {
@@ -47,3 +47,7 @@ export class RegisterDto {
   @IsOptional()
   emailData?: CreateUserEmailDto;
 }
+// 定义注册数据类型映射
+export type RegisterDataMap = {
+  [UserRegisterType.邮箱]: CreateUserEmailDto;
+};

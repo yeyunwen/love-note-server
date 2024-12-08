@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import GLOBAL_CONFIG from '../common/config';
+import GLOBAL_CONFIG from '~/common/config';
 @Injectable()
 export class UploadService {
   async uploadFiles(files: Express.Multer.File[]) {

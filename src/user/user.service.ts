@@ -7,12 +7,12 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { RegisterDto } from './dto/register.dto';
-import { RegisterDataMap, UserRegisterType } from './types';
+import { RegisterDto, RegisterDataMap } from './dto/register.dto';
+import { UserRegisterType } from './types/enum';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { REDIS_CLIENT } from '../common/redis/redis.module';
+import { REDIS_CLIENT } from '~/common/redis/redis.module';
 import Redis from 'ioredis';
 
 // 将 scrypt 转换为 Promise 版本
@@ -57,7 +57,7 @@ export class UserService {
   }
 
   async register(registerDto: RegisterDto) {
-    const strategy = this.strategies.get(registerDto.type);
+    const strategy = this.strategies.get(registerDto.type as UserRegisterType);
     if (!strategy) {
       throw new BadRequestException('不支持的注册方式');
     }

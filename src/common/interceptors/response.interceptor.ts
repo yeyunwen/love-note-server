@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
-import { BaseResponse } from '../entities/response.entity';
+import { BaseResponse } from '~/common/entities/response.entity';
 
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<T, any> {

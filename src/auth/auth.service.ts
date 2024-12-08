@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { User } from '../user/entities/user.entity';
-import { REDIS_CLIENT } from 'src/common/redis/redis.module';
+import { REDIS_CLIENT } from '~/common/redis/redis.module';
 import type Redis from 'ioredis';
-import { EmailService } from 'src/common/email/email.service';
+import { EmailService } from '~/common/email/email.service';
 
 export type SafeUserInfo = Omit<User, 'password'>;
 

@@ -4,8 +4,8 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BindLoverDto } from './dto/bind-lover.dto';
 import { UnbindLoverDto } from './dto/unbind-lover.dto';
 import { RegisterDto } from './dto/register.dto';
-import { ApiController } from '../common/decorators/api-controller.decorator';
-import { Public } from '../common/decorators/public.decorator';
+import { ApiController } from '~/common/decorators/api-controller.decorator';
+import { Public } from '~/common/decorators/public.decorator';
 
 @ApiTags('用户')
 @ApiController('user')

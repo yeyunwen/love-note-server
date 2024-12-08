@@ -8,8 +8,8 @@ import {
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
-import { Public } from '../common/decorators/public.decorator';
-import { JwtPayload } from '../common/types';
+import { Public } from '~/common/decorators/public.decorator';
+import { JwtPayload } from '~/common/types';
 import { LoginEmailDto } from './dto/login.dto';
 import { SendEmailVerifyCodeDto } from './dto/verify-code.dto';
 

@@ -1,7 +1,7 @@
 import { parse } from 'yaml';
 import path from 'node:path';
 import fs from 'node:fs';
-import { AppConfig } from '../types';
+import { AppConfig } from '~/common/types';
 
 type Env = 'dev' | 'test' | 'prod';
 

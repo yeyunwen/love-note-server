@@ -3,11 +3,11 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { UserModule } from '../user/user.module';
+import { UserModule } from '~/user/user.module';
 import { JwtStrategy } from './jwt.strategy';
-import GLOBAL_CONFIG from '../common/config';
-import { EmailService } from '../common/email/email.service';
-import { RedisModule } from '../common/redis/redis.module';
+import GLOBAL_CONFIG from '~/common/config';
+import { EmailService } from '~/common/email/email.service';
+import { RedisModule } from '~/common/redis/redis.module';
 
 @Module({
   imports: [

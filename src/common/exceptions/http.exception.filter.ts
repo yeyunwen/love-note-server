@@ -4,7 +4,7 @@ import {
   ArgumentsHost,
   HttpException,
 } from '@nestjs/common';
-import { BaseResponse } from '../entities/response.entity';
+import { BaseResponse } from '~/common/entities/response.entity';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
