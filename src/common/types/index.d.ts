@@ -56,5 +56,6 @@ export type AppConfig = DeepReadonly<_Config>;
 
 export type JwtPayload = {
   userId: number;
+  uid: string;
   username: string;
 };
