@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/jwt.guard';
 import { RedisModule } from './common/redis/redis.module';
 import { UploadModule } from './upload/upload.module';
+import { NoteModule } from './note/note.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { UploadModule } from './upload/upload.module';
     AuthModule,
     RedisModule,
     UploadModule,
+    NoteModule,
   ],
   providers: [
     {

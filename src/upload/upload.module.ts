@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
 import { UploadController } from './upload.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Image } from '~/note/entities/image.entity';
 
 @Module({
   imports: [
@@ -20,6 +22,7 @@ import { UploadController } from './upload.controller';
         }
       },
     }),
+    TypeOrmModule.forFeature([Image]),
   ],
   controllers: [UploadController],
   providers: [UploadService],
