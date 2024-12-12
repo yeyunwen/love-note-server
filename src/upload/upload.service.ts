@@ -24,7 +24,7 @@ export class UploadService {
     });
   }
 
-  async uploadNoteImage(files: Express.Multer.File[]) {
+  async uploadLocalNoteImage(files: Express.Multer.File[]) {
     const uploadedFiles = await Promise.all(
       files.map(async (file) => {
         const { filename, originalname, size } = file;

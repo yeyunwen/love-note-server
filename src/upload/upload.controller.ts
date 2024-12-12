@@ -1,70 +1,26 @@
-import { extname } from 'node:path';
-import { Post, UploadedFiles, UseInterceptors } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { Post, UploadedFiles } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { UploadService } from '~/upload/upload.service';
-import GLOBAL_CONFIG from '~/common/config';
 import { ApiController } from '~/common/decorators/api-controller.decorator';
-import { Public } from '~/common/decorators/public.decorator';
+import { LocalUpload } from '~/common/decorators/local-upload.decorator';
 
 @ApiTags('文件上传')
 @ApiController('upload')
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
-  private static getFilesInterceptor() {
-    return FilesInterceptor(
-      'files',
-      GLOBAL_CONFIG.UPLOAD_CONFIG.MAX_FILE_COUNT,
-      {
-        storage: diskStorage({
-          destination: GLOBAL_CONFIG.UPLOAD_CONFIG.DESTINATION,
-          filename: (req, file, callback) => {
-            const uniqueSuffix =
-              Date.now() + '-' + Math.round(Math.random() * 1e9);
-            callback(null, `${uniqueSuffix}${extname(file.originalname)}`);
-          },
-        }),
-        limits: {
-          fileSize: GLOBAL_CONFIG.UPLOAD_CONFIG.MAX_FILE_SIZE * 1024 * 1024,
-          files: GLOBAL_CONFIG.UPLOAD_CONFIG.MAX_FILE_COUNT,
-        },
-      },
-    );
-  }
-
-  private static getApiBodySchema() {
-    return {
-      schema: {
-        type: 'object',
-        properties: {
-          files: {
-            type: 'array',
-            items: {
-              type: 'string',
-              format: 'binary',
-            },
-          },
-        },
-      },
-    };
-  }
-
   @Post('local')
-  @UseInterceptors(UploadController.getFilesInterceptor())
-  @ApiConsumes('multipart/form-data')
-  @ApiBody(UploadController.getApiBodySchema())
+  @LocalUpload()
   async uploadFiles(@UploadedFiles() files: Express.Multer.File[]) {
     return this.uploadService.uploadFiles(files);
   }
 
-  @Post('note-image')
-  @Public()
-  @UseInterceptors(UploadController.getFilesInterceptor())
-  @ApiConsumes('multipart/form-data')
-  @ApiBody(UploadController.getApiBodySchema())
-  async uploadNoteImage(@UploadedFiles() files: Express.Multer.File[]) {
-    return this.uploadService.uploadNoteImage(files);
+  @Post('local/note-image')
+  @LocalUpload({
+    description: '上传笔记图片',
+    allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'],
+  })
+  async uploadLocalNoteImage(@UploadedFiles() files: Express.Multer.File[]) {
+    return this.uploadService.uploadLocalNoteImage(files);
   }
 }
