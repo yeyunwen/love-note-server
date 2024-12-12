@@ -1,21 +1,31 @@
 import { Controller } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { IS_PUBLIC_KEY } from './public.decorator';
 
 type ApiControllerPath = string | string[];
 
 interface ApiControllerBaseOptions {
+  /**
+   * 是否公开
+   */
   isPublic?: boolean;
-  // 这里可以添加更多通用配置选项
-  version?: string;
-  description?: string;
+  /**
+   * 标签
+   */
+  tags?: string[] | string;
 }
 
 interface ApiControllerOptionsWithPath extends ApiControllerBaseOptions {
+  /**
+   * 路径
+   */
   path: ApiControllerPath;
 }
 
 interface ApiControllerOptionsWithoutPath extends ApiControllerBaseOptions {
+  /**
+   * 路径
+   */
   path?: never;
 }
 
@@ -35,7 +45,10 @@ export const ApiController = (
 
     if (typeof pathOrOptions === 'object' && !Array.isArray(pathOrOptions)) {
       path = pathOrOptions.path;
-      options = { ...options, ...pathOrOptions };
+      options = {
+        ...options,
+        ...pathOrOptions,
+      };
     } else {
       path = pathOrOptions;
     }
@@ -56,6 +69,11 @@ export const ApiController = (
 
     if (!options.isPublic) {
       ApiBearerAuth()(target);
+    }
+
+    if (options.tags) {
+      const tags = Array.isArray(options.tags) ? options.tags : [options.tags];
+      ApiTags(...tags)(target);
     }
 
     Controller(path)(target);

@@ -22,7 +22,10 @@ export class Image {
   @Column({ comment: '图片高度' })
   height: number;
 
-  @ManyToOne(() => Note, (note) => note.images, { onDelete: 'CASCADE' })
+  @Column({ name: 'noteId', nullable: true }) // 添加 noteId 列
+  noteId: number;
+
+  @ManyToOne(() => Note, (note) => note.images)
   note: Note;
 
   @CreateDateColumn({ comment: '创建时间' })
