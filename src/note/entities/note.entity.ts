@@ -7,7 +7,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Transform } from 'class-transformer';
 import { User } from '~/user/entities/user.entity';
 import { Image } from './image.entity';
 
@@ -26,7 +25,6 @@ export class Note {
   user: User;
 
   @OneToMany(() => Image, (image) => image.note)
-  @Transform(({ value }) => value?.map((image) => ({ id: image.id })))
   images: Image[];
 
   @CreateDateColumn({ comment: '创建时间' })

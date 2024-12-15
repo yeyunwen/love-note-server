@@ -4,7 +4,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { Note } from './entities/note.entity';
-import { Image } from './entities/image.entity';
 
 @Injectable()
 export class NoteService {
@@ -13,22 +12,22 @@ export class NoteService {
   ) {}
 
   async create(createNoteDto: CreateNoteDto & { userId: number }) {
-    const { userId, ...note } = createNoteDto;
+    const { userId, imageIds, ...note } = createNoteDto;
     const noteEntity = this.noteRepository.create({
       user: { id: userId },
+      images: imageIds.map((imageId) => ({ id: imageId })),
       ...note,
     });
 
-    if (note.imageIds?.length) {
-      noteEntity.images = note.imageIds.map(
-        (imageId) =>
-          ({
-            id: imageId,
-          }) as Image,
-      );
-    }
-
     const savedNote = await this.noteRepository.save(noteEntity);
-    return instanceToPlain(savedNote);
+    return savedNote;
+  }
+
+  async findAllForUser(userId: number) {
+    const notes = await this.noteRepository.find({
+      where: { user: { id: userId } },
+      relations: ['images'],
+    });
+    return instanceToPlain(notes);
   }
 }
