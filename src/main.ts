@@ -18,7 +18,7 @@ async function bootstrap() {
   app.useStaticAssets(
     join(__dirname, '..', GLOBAL_CONFIG.UPLOAD_CONFIG.DESTINATION),
     {
-      prefix: GLOBAL_CONFIG.UPLOAD_CONFIG.DESTINATION,
+      prefix: `/${GLOBAL_CONFIG.UPLOAD_CONFIG.DESTINATION}/`,
     },
   );
   generateDocument(app);
