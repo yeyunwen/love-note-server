@@ -1,9 +1,10 @@
-import { Post, Body, Get } from '@nestjs/common';
+import { Post, Body, Get, Query } from '@nestjs/common';
 import { NoteService } from './note.service';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { User } from '~/common/decorators/user.decorator';
 import { JwtPayload } from '~/common/types';
 import { ApiController } from '~/common/decorators/api-controller.decorator';
+import { PaginationQueryDto } from '~/common/dto/pagination.dto';
 
 @ApiController({ path: 'note', tags: '笔记' })
 export class NoteController {
@@ -18,10 +19,13 @@ export class NoteController {
   }
 
   /**
-   * 获取用户所有笔记
+   * 分页获取用户笔记
    */
   @Get()
-  findUserNotes(@User() { userId }: JwtPayload) {
-    return this.noteService.findAllForUser(userId);
+  findUserNotes(
+    @User() { userId }: JwtPayload,
+    @Query() query: PaginationQueryDto,
+  ) {
+    return this.noteService.findAllForUser(userId, query);
   }
 }

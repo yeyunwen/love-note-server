@@ -1,9 +1,9 @@
 import { Repository } from 'typeorm';
-import { instanceToPlain } from 'class-transformer';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { Note } from './entities/note.entity';
+import { PaginationQueryDto } from '~/common/dto/pagination.dto';
 
 @Injectable()
 export class NoteService {
@@ -23,11 +23,23 @@ export class NoteService {
     return savedNote;
   }
 
-  async findAllForUser(userId: number) {
-    const notes = await this.noteRepository.find({
+  async findAllForUser(userId: number, query: PaginationQueryDto) {
+    const [notes, total] = await this.noteRepository.findAndCount({
       where: { user: { id: userId } },
       relations: ['images'],
+      skip: (query.page - 1) * query.limit,
+      take: query.limit,
+      order: { createdTime: 'DESC' },
     });
-    return instanceToPlain(notes);
+
+    return {
+      items: notes,
+      meta: {
+        page: query.page,
+        limit: query.limit,
+        total,
+        totalPages: Math.ceil(total / query.limit),
+      },
+    };
   }
 }
