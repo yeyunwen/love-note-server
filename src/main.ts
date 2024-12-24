@@ -12,7 +12,12 @@ import { HttpExceptionFilter } from './common/exceptions/http.exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true, // 开启数据转换
+      whitelist: true, // 过滤掉未定义的属性
+    }),
+  );
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new AllExceptionsFilter(), new HttpExceptionFilter());
   app.useStaticAssets(
