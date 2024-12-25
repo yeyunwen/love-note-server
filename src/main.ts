@@ -9,6 +9,7 @@ import GLOBAL_CONFIG from './common/config';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { AllExceptionsFilter } from './common/exceptions/all.exception.filter';
 import { HttpExceptionFilter } from './common/exceptions/http.exception.filter';
+import { TransformDateInterceptor } from './common/interceptors/transform-date.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -18,7 +19,10 @@ async function bootstrap() {
       whitelist: true, // 过滤掉未定义的属性
     }),
   );
-  app.useGlobalInterceptors(new ResponseInterceptor());
+  app.useGlobalInterceptors(
+    new ResponseInterceptor(),
+    new TransformDateInterceptor(),
+  );
   app.useGlobalFilters(new AllExceptionsFilter(), new HttpExceptionFilter());
   app.useStaticAssets(
     join(__dirname, '..', GLOBAL_CONFIG.UPLOAD_CONFIG.DESTINATION),
