@@ -1,4 +1,4 @@
-import { Post, Body, Get, Query } from '@nestjs/common';
+import { Post, Body, Get, Query, Param, ParseIntPipe } from '@nestjs/common';
 import { NoteService } from './note.service';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { User } from '~/common/decorators/user.decorator';
@@ -27,5 +27,12 @@ export class NoteController {
     @Query() query: PaginationQueryDto,
   ) {
     return this.noteService.findAllForUser(userId, query);
+  }
+  /**
+   * 获取笔记详情
+   */
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.noteService.findOne(id);
   }
 }

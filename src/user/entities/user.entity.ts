@@ -8,8 +8,8 @@ import {
   UpdateDateColumn,
   ManyToOne,
 } from 'typeorm';
-
 import { UserGender } from '~/user/types';
+import GLOBAL_CONFIG from '~/common/config';
 
 @Entity()
 export class User {
@@ -21,6 +21,12 @@ export class User {
 
   @Column({ unique: true, comment: '邮箱' })
   email: string;
+
+  @Column({
+    comment: '头像',
+    default: `http://localhost:${GLOBAL_CONFIG.SERVER_CONFIG.PORT}/uploads/default-avatar.png`,
+  })
+  avatar: string;
 
   @Column({ length: 60, comment: '用户名' })
   username: string;

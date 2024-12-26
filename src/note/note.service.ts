@@ -42,4 +42,19 @@ export class NoteService {
       },
     };
   }
+
+  async findOne(id: number) {
+    const note = await this.noteRepository.findOne({
+      where: { id },
+      relations: ['images', 'user'],
+      select: {
+        user: {
+          id: true,
+          username: true,
+          avatar: true,
+        },
+      },
+    });
+    return note;
+  }
 }
