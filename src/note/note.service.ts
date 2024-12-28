@@ -26,7 +26,14 @@ export class NoteService {
   async findAllForUser(userId: number, query: PaginationQueryDto) {
     const [notes, total] = await this.noteRepository.findAndCount({
       where: { user: { id: userId } },
-      relations: ['images'],
+      relations: ['images', 'user'],
+      select: {
+        user: {
+          id: true,
+          username: true,
+          avatar: true,
+        },
+      },
       skip: (query.page - 1) * query.limit,
       take: query.limit,
       order: { createdTime: 'DESC' },
