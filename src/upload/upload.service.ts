@@ -44,6 +44,7 @@ export class UploadService {
         await this.imageRepository.save(image);
 
         return {
+          id: image.id,
           originalname,
           size,
           url,
