@@ -15,10 +15,10 @@ export class Note {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 255, comment: '文章标题' })
+  @Column({ length: 255, comment: '文章标题', nullable: true })
   title: string;
 
-  @Column({ type: 'text', comment: '文章内容' })
+  @Column({ type: 'text', comment: '文章内容', nullable: true })
   content: string;
 
   @ManyToOne(() => User)
