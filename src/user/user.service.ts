@@ -32,7 +32,7 @@ export class UserService {
     this.strategies = new Map([[UserRegisterType.邮箱, this.emailRegister]]);
   }
 
-  private generateUid(): string {
+  static generateUid(): string {
     const uid = uuidv4();
     const numericUid = uid
       .replace(/-/g, '')
@@ -45,7 +45,7 @@ export class UserService {
     const randomNumber = Math.floor(Math.random() * 100000);
     return `user_${randomNumber}`;
   }
-  private async hashPassword(password: string) {
+  static async hashPassword(password: string) {
     const salt = randomBytes(16).toString('hex');
     const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
     return salt + ':' + derivedKey.toString('hex');
@@ -91,11 +91,11 @@ export class UserService {
     if (verifyCode !== data.verifyCode) {
       throw new HttpException('验证码错误', 200);
     }
-    const password = await this.hashPassword(data.password);
+    const password = await UserService.hashPassword(data.password);
     const user = this.userRepository.create({
       email: data.email,
       password,
-      uid: this.generateUid(),
+      uid: UserService.generateUid(),
       username: await this.generateDefaultUsername(),
     });
     const savedUser = await this.userRepository.save(user);
@@ -224,7 +224,7 @@ export class UserService {
       uid: 'test_uid',
       email: 'test@example.com',
       username: 'testuser',
-      password: await this.hashPassword('testpassword'),
+      password: await UserService.hashPassword('testpassword'),
     });
 
     await this.userRepository.save(testUser);

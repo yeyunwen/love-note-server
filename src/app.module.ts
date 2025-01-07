@@ -26,6 +26,9 @@ import { NoteModule } from './note/note.module';
       database: GLOBAL_CONFIG.MYSQL_CONFIG.DATABASE,
       logging: isDev,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      // 项目开发初期，暂时允许开发环境同步数据库
+      // TODO：项目稳定后，synchronize 应该一直设置为 false
+      // 并使用 migrations 来管理数据库的变更
       synchronize: isDev,
     }),
     UserModule,

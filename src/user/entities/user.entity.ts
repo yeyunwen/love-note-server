@@ -40,7 +40,7 @@ export class User {
     default: UserGender.未知,
     comment: '性别 0:未知 1:男 2:女',
   })
-  gender: number;
+  gender: UserGender;
 
   @OneToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'lover_uid', referencedColumnName: 'uid' })
