@@ -6,7 +6,8 @@ import {
   UsePipes,
 } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiOperation } from '@nestjs/swagger';
-import { type LocalUploadConfig, UploadConfig } from '~/upload/upload.config';
+import { LocalUploadConfig } from '~/upload/upload.config';
+import { UploadConfig } from '~/upload/upload.config';
 
 export interface LocalUploadOptions extends Partial<LocalUploadConfig> {
   /** Swagger文档描述 */

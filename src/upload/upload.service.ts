@@ -24,11 +24,14 @@ export class UploadService {
     });
   }
 
-  async uploadLocalNoteImage(files: Express.Multer.File[]) {
+  async uploadLocalNoteImage(
+    files: Express.Multer.File[],
+    destination: string,
+  ) {
     const uploadedFiles = await Promise.all(
       files.map(async (file) => {
         const { filename, originalname, size } = file;
-        const url = `http://localhost:${GLOBAL_CONFIG.SERVER_CONFIG.PORT}/uploads/${filename}`;
+        const url = `http://localhost:${GLOBAL_CONFIG.SERVER_CONFIG.PORT}/${destination}/${filename}`;
 
         // 获取图片尺寸
         const dimensions = sizeOf(file.path);

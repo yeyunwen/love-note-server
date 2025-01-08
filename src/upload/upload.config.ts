@@ -2,12 +2,13 @@ import { extname } from 'node:path';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import GLOBAL_CONFIG from '~/common/config';
+import multer from 'multer';
 
 export interface LocalUploadConfig {
   /** 文件存储路径
    * @default GLOBAL_CONFIG.UPLOAD_CONFIG.DESTINATION uploads
    */
-  destination: string;
+  destination: multer.DiskStorageOptions['destination'];
   /** 最大文件数量
    * @default GLOBAL_CONFIG.UPLOAD_CONFIG.MAX_FILE_COUNT 9
    */
@@ -36,7 +37,10 @@ export class UploadConfig {
         filename: (req, file, callback) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);
-          callback(null, `${uniqueSuffix}${extname(file.originalname)}`);
+          console.log('file', file);
+          const filename = `${uniqueSuffix}${extname(file.originalname)}`;
+          console.log('filename', filename);
+          callback(null, filename);
         },
       }),
       limits: {
