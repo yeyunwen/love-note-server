@@ -13,14 +13,37 @@ export class NoteService {
 
   async create(createNoteDto: CreateNoteDto & { userId: number }) {
     const { userId, imageIds, ...note } = createNoteDto;
+
+    // 先创建 note
     const noteEntity = this.noteRepository.create({
       user: { id: userId },
-      images: imageIds.map((imageId) => ({ id: imageId })),
       ...note,
     });
-
     const savedNote = await this.noteRepository.save(noteEntity);
-    return savedNote;
+
+    // 先建立关系
+    await this.noteRepository
+      .createQueryBuilder()
+      .relation(Note, 'images')
+      .of(savedNote)
+      .add(imageIds);
+
+    // 然后更新每个图片的 order
+    await Promise.all(
+      imageIds.map((imageId, index) =>
+        this.noteRepository.manager
+          .createQueryBuilder()
+          .update('note_image')
+          .set({ order: index })
+          .where('id = :id AND noteId = :noteId', {
+            id: imageId,
+            noteId: savedNote.id,
+          })
+          .execute(),
+      ),
+    );
+
+    return this.findOne(savedNote.id);
   }
 
   async findAllForUser(userId: number, query: PaginationQueryDto) {
@@ -36,7 +59,12 @@ export class NoteService {
       },
       skip: (query.page - 1) * query.limit,
       take: query.limit,
-      order: { createdTime: 'DESC' },
+      order: {
+        createdTime: 'DESC',
+        images: {
+          order: 'ASC',
+        },
+      },
     });
 
     return {
@@ -59,6 +87,11 @@ export class NoteService {
           id: true,
           username: true,
           avatar: true,
+        },
+      },
+      order: {
+        images: {
+          order: 'ASC',
         },
       },
     });

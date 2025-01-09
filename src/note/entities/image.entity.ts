@@ -25,6 +25,9 @@ export class Image {
   @Column({ name: 'noteId', nullable: true }) // 添加 noteId 列
   noteId: number;
 
+  @Column({ name: 'order', default: 0 })
+  order: number;
+
   @ManyToOne(() => Note, (note) => note.images)
   note: Note;
 
