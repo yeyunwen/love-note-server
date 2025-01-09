@@ -37,9 +37,7 @@ export class UploadConfig {
         filename: (req, file, callback) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);
-          console.log('file', file);
           const filename = `${uniqueSuffix}${extname(file.originalname)}`;
-          console.log('filename', filename);
           callback(null, filename);
         },
       }),

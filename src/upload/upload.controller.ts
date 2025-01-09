@@ -5,6 +5,7 @@ import { ApiController } from '~/common/decorators/api-controller.decorator';
 import { LocalUpload } from '~/common/decorators/local-upload.decorator';
 import dayjs from 'dayjs';
 import { Request } from 'express';
+import { existsSync, mkdirSync } from 'fs';
 
 @ApiTags('文件上传')
 @ApiController('upload')
@@ -21,6 +22,11 @@ export class UploadController {
   @LocalUpload({
     destination: (req: Request & { destination: string }, file, callback) => {
       const destination = `uploads/note-image/${dayjs().format('YYYYMMDD')}/`;
+
+      if (!existsSync(destination)) {
+        mkdirSync(destination, { recursive: true });
+      }
+
       req.destination = destination;
       callback(null, destination);
     },
