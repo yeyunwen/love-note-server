@@ -47,9 +47,10 @@ export class NoteService {
   }
 
   async findAllForUser(userId: number, query: PaginationQueryDto) {
+    // 先获取分页后的笔记
     const [notes, total] = await this.noteRepository.findAndCount({
       where: { user: { id: userId } },
-      relations: ['images', 'user'],
+      relations: ['user'],
       select: {
         user: {
           id: true,
@@ -57,18 +58,24 @@ export class NoteService {
           avatar: true,
         },
       },
+      order: { createdTime: 'DESC' },
       skip: (query.page - 1) * query.limit,
       take: query.limit,
-      order: {
-        createdTime: 'DESC',
-        images: {
-          order: 'ASC',
-        },
-      },
     });
 
+    // 为每个笔记加载其关联的图片，并按顺序排序
+    const notesWithImages = await Promise.all(
+      notes.map(async (note) => {
+        const images = await this.loadImagesForNote(note.id);
+        return {
+          ...note,
+          images,
+        };
+      }),
+    );
+
     return {
-      items: notes,
+      items: notesWithImages,
       meta: {
         page: query.page,
         limit: query.limit,
@@ -96,5 +103,14 @@ export class NoteService {
       },
     });
     return note;
+  }
+
+  private async loadImagesForNote(noteId: number) {
+    return this.noteRepository
+      .createQueryBuilder('note')
+      .relation(Note, 'images')
+      .of(noteId)
+      .loadMany()
+      .then((images) => images.sort((a, b) => a.order - b.order));
   }
 }
