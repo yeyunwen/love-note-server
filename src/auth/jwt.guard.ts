@@ -1,7 +1,12 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../common/decorators/public.decorator';
+import { JsonWebTokenError, TokenExpiredError } from '@nestjs/jwt';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -19,5 +24,18 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return true;
     }
     return super.canActivate(context);
+  }
+
+  handleRequest(err: any, user: any, info: any) {
+    if (err || !user) {
+      if (info instanceof TokenExpiredError) {
+        throw new UnauthorizedException('登录过期，请重新登录');
+      } else if (info instanceof JsonWebTokenError) {
+        throw new UnauthorizedException('未登录');
+      } else {
+        throw new UnauthorizedException('未登录');
+      }
+    }
+    return user;
   }
 }
