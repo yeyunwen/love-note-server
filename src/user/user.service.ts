@@ -25,13 +25,6 @@ export class UserService {
     (data: RegisterDataMap[UserRegisterType]) => Promise<User>
   >;
 
-  constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
-    @Inject(REDIS_CLIENT) private redisClient: Redis,
-  ) {
-    this.strategies = new Map([[UserRegisterType.邮箱, this.emailRegister]]);
-  }
-
   static generateUid(): string {
     const uid = uuidv4();
     const numericUid = uid
@@ -41,10 +34,7 @@ export class UserService {
       .join('');
     return numericUid.slice(0, 12);
   }
-  private async generateDefaultUsername() {
-    const randomNumber = Math.floor(Math.random() * 100000);
-    return `user_${randomNumber}`;
-  }
+
   static async hashPassword(password: string) {
     const salt = randomBytes(16).toString('hex');
     const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
@@ -54,6 +44,18 @@ export class UserService {
     const [salt, hash] = storedHash.split(':');
     const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
     return derivedKey.toString('hex') === hash;
+  }
+
+  private async generateDefaultUsername() {
+    const randomNumber = Math.floor(Math.random() * 100000);
+    return `user_${randomNumber}`;
+  }
+
+  constructor(
+    @InjectRepository(User) private userRepository: Repository<User>,
+    @Inject(REDIS_CLIENT) private redisClient: Redis,
+  ) {
+    this.strategies = new Map([[UserRegisterType.邮箱, this.emailRegister]]);
   }
 
   async register(registerDto: RegisterDto) {
