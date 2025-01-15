@@ -115,6 +115,31 @@ export class UserService {
       : null;
   }
 
+  async getUserInfo(uid: string) {
+    const user = await this.userRepository.findOne({
+      where: { uid },
+      relations: ['lover', 'loverRequest'],
+      select: {
+        lover: {
+          uid: true,
+          username: true,
+          gender: true,
+          avatar: true,
+        },
+        loverRequest: {
+          uid: true,
+          username: true,
+          gender: true,
+          avatar: true,
+        },
+      },
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...safeUser } = user;
+
+    return safeUser;
+  }
+
   // async createByEmail(createUserDto: CreateUserEmailDto) {
   //   const hasUser = await this.userRepository.findOne({
   //     where: { email: createUserDto.email },

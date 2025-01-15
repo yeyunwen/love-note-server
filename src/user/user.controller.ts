@@ -1,4 +1,4 @@
-import { Post, Body } from '@nestjs/common';
+import { Post, Body, Get } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AcceptLoverDto, BindLoverDto } from './dto/bind-lover.dto';
@@ -12,6 +12,12 @@ import { JwtPayload } from '~/common/types';
 @ApiController('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @ApiOperation({ summary: '获取用户信息' })
+  @Get('me')
+  async getUserInfo(@User() user: JwtPayload) {
+    return await this.userService.getUserInfo(user.uid);
+  }
 
   @ApiOperation({ summary: '创建用户' })
   @Post()
