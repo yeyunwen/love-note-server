@@ -1,7 +1,11 @@
 import { Post, Body, Get } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AcceptLoverDto, BindLoverDto } from './dto/bind-lover.dto';
+import {
+  AcceptLoverDto,
+  BindLoverDto,
+  RejectLoverDto,
+} from './dto/bind-lover.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ApiController } from '~/common/decorators/api-controller.decorator';
 import { Public } from '~/common/decorators/public.decorator';
@@ -33,7 +37,7 @@ export class UserController {
     @Body() bindLoverDto: BindLoverDto,
     @User() user: JwtPayload,
   ) {
-    await this.userService.bindLoverRequest(user.uid, bindLoverDto.loverUid);
+    await this.userService.sendLoverRequest(user.uid, bindLoverDto.loverUid);
     return '绑定请求发送成功';
   }
 
@@ -43,11 +47,26 @@ export class UserController {
     @Body() acceptLoverDto: AcceptLoverDto,
     @User() user: JwtPayload,
   ) {
-    await this.userService.acceptLoverRequest(
+    await this.userService.handleLoverRequest(
       user.uid,
-      acceptLoverDto.loverUid,
+      acceptLoverDto.requestId,
+      true,
     );
     return '接受请求成功';
+  }
+
+  @ApiOperation({ summary: '拒绝恋人请求' })
+  @Post('lover/reject')
+  async rejectLoverRequest(
+    @Body() rejectLoverDto: RejectLoverDto,
+    @User() user: JwtPayload,
+  ) {
+    await this.userService.handleLoverRequest(
+      user.uid,
+      rejectLoverDto.requestId,
+      false,
+    );
+    return '拒绝请求成功';
   }
 
   @ApiOperation({ summary: '解除恋人绑定' })

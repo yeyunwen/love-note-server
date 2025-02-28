@@ -6,10 +6,11 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  ManyToOne,
+  OneToMany,
 } from 'typeorm';
 import { UserGender } from '~/user/types';
 import GLOBAL_CONFIG from '~/common/config';
+import { LoverRequest } from './lover-request.entity';
 
 @Entity()
 export class User {
@@ -46,11 +47,12 @@ export class User {
   @JoinColumn({ name: 'lover_uid', referencedColumnName: 'uid' })
   lover: User;
 
-  @ManyToOne(() => User, (user) => user.loverRequest, {
-    nullable: true,
-    onDelete: 'SET NULL',
-  })
-  loverRequest: User;
+  @OneToMany(() => LoverRequest, (request) => request.sender)
+  sentRequests: LoverRequest[];
+
+  @OneToMany(() => LoverRequest, (request) => request.receiver)
+  receivedRequests: LoverRequest[];
+
   @CreateDateColumn({ comment: '创建时间' })
   createdTime: Date;
 

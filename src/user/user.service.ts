@@ -14,6 +14,8 @@ import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { REDIS_CLIENT } from '~/common/redis/redis.module';
 import Redis from 'ioredis';
+import { LoverRequest } from './entities/lover-request.entity';
+import { LoverRequestStatus } from './entities/lover-request.entity';
 
 // 将 scrypt 转换为 Promise 版本
 const scryptAsync = promisify(scrypt);
@@ -53,6 +55,8 @@ export class UserService {
 
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(LoverRequest)
+    private loverRequestRepository: Repository<LoverRequest>,
     @Inject(REDIS_CLIENT) private redisClient: Redis,
   ) {
     this.strategies = new Map([[UserRegisterType.邮箱, this.emailRegister]]);
@@ -118,7 +122,13 @@ export class UserService {
   async getUserInfo(uid: string) {
     const user = await this.userRepository.findOne({
       where: { uid },
-      relations: ['lover', 'loverRequest'],
+      relations: [
+        'lover',
+        'sentRequests',
+        'sentRequests.receiver',
+        'receivedRequests',
+        'receivedRequests.sender',
+      ],
       select: {
         lover: {
           uid: true,
@@ -126,11 +136,29 @@ export class UserService {
           gender: true,
           avatar: true,
         },
-        loverRequest: {
-          uid: true,
-          username: true,
-          gender: true,
-          avatar: true,
+        receivedRequests: {
+          id: true,
+          status: true,
+          createdTime: true,
+          updatedTime: true,
+          sender: {
+            uid: true,
+            username: true,
+            gender: true,
+            avatar: true,
+          },
+        },
+        sentRequests: {
+          id: true,
+          status: true,
+          createdTime: true,
+          updatedTime: true,
+          receiver: {
+            uid: true,
+            username: true,
+            gender: true,
+            avatar: true,
+          },
         },
       },
     });
@@ -159,67 +187,146 @@ export class UserService {
   // }
 
   /**
-   * 绑定恋人请求
+   * 发送绑定恋人请求
    */
-  async bindLoverRequest(userUid: string, loverUid: string): Promise<void> {
-    if (userUid === loverUid) {
-      throw new HttpException('不能绑定自己', 200);
+  async sendLoverRequest(
+    senderUid: string,
+    receiverUid: string,
+  ): Promise<void> {
+    if (senderUid === receiverUid) {
+      throw new HttpException('不能绑定自己', 400);
     }
-    const user = await this.userRepository.findOne({
-      where: { uid: userUid },
+
+    const [sender, receiver] = await Promise.all([
+      this.userRepository.findOne({
+        where: { uid: senderUid },
+        relations: ['lover'],
+      }),
+      this.userRepository.findOne({
+        where: { uid: receiverUid },
+        relations: ['lover'],
+      }),
+    ]);
+
+    if (!sender || !receiver) {
+      throw new HttpException('用户不存在', 400);
+    }
+
+    if (sender.lover || receiver.lover) {
+      throw new HttpException('用户已有恋人', 400);
+    }
+
+    // 检查是否已经存在未处理的请求
+    const existingRequest = await this.loverRequestRepository.findOne({
+      where: [
+        {
+          sender: { uid: senderUid },
+          receiver: { uid: receiverUid },
+          status: LoverRequestStatus.待处理,
+        },
+        {
+          sender: { uid: receiverUid },
+          receiver: { uid: senderUid },
+          status: LoverRequestStatus.待处理,
+        },
+      ],
+      relations: ['sender', 'receiver'],
     });
-    const lover = await this.userRepository.findOne({
-      where: { uid: loverUid },
-      relations: ['loverRequest'],
+
+    if (existingRequest) {
+      if (existingRequest.sender.uid === senderUid) {
+        throw new HttpException(
+          '你已经向对方发送过绑定请求，请等待对方处理',
+          400,
+        );
+      } else {
+        throw new HttpException(
+          '对方已向你发送绑定请求，请先处理对方的请求',
+          400,
+        );
+      }
+    }
+
+    const request = this.loverRequestRepository.create({
+      sender,
+      receiver,
+      status: LoverRequestStatus.待处理,
     });
-    if (!user || !lover) {
-      throw new HttpException('用户不存在', 200);
-    }
-    if (user.lover || lover.lover) {
-      throw new HttpException('用户已有恋人', 200);
-    }
-    if (lover.loverRequest?.uid === userUid) {
-      throw new HttpException('对方已向你发送绑定请求', 200);
-    }
-    // 设置请求状态为 pending
-    user.loverRequest = lover;
-    await this.userRepository.save(user);
+
+    await this.loverRequestRepository.save(request);
   }
 
   /**
-   * 接受恋人请求
+   * 处理绑定请求
    */
-  async acceptLoverRequest(userUid: string, loverUid: string): Promise<void> {
-    const user = await this.userRepository.findOne({
-      where: { uid: userUid },
-    });
-    const lover = await this.userRepository.findOne({
-      where: { uid: loverUid },
-      relations: ['loverRequest'],
-    });
-    if (!user || !lover) {
-      throw new HttpException('用户不存在', 200);
-    }
-    if (lover.loverRequest?.uid !== userUid) {
-      throw new HttpException('对方没有向你发送绑定请求', 200);
-    }
-    if (user.lover) {
-      throw new HttpException('你已与其他人绑定', 200);
-    }
-    if (lover.lover) {
-      throw new HttpException('对方已与其他人绑定', 200);
-    }
-    // 双方同意绑定
-    user.lover = lover;
-    lover.lover = user;
-    user.loverRequest = null; // 清除请求状态
-    lover.loverRequest = null; // 清除请求状态
-    await this.userRepository.manager.transaction(
-      async (transactionalEntityManager) => {
-        await transactionalEntityManager.save(user);
-        await transactionalEntityManager.save(lover);
+  async handleLoverRequest(
+    receiverUid: string,
+    requestId: number,
+    accept: boolean,
+  ): Promise<void> {
+    // 1. 查找对应的请求记录
+
+    const request = await this.loverRequestRepository.findOne({
+      where: {
+        id: requestId,
+        receiver: { uid: receiverUid },
+        status: LoverRequestStatus.待处理,
       },
-    );
+      relations: ['sender', 'receiver'],
+    });
+
+    // 2. 验证请求是否存在
+    if (!request) {
+      throw new HttpException('请求不存在或已处理', 400);
+    }
+
+    // 3. 如果选择接受请求
+    if (accept) {
+      // 3.1 重新检查双方是否已有恋人
+      const [sender, receiver] = await Promise.all([
+        this.userRepository.findOne({
+          where: { uid: request.sender.uid },
+          relations: ['lover'],
+        }),
+        this.userRepository.findOne({
+          where: { uid: request.receiver.uid },
+          relations: ['lover'],
+        }),
+      ]);
+
+      if (sender.lover || receiver.lover) {
+        throw new HttpException('用户已有恋人', 400);
+      }
+
+      // 3.2 使用事务来确保数据一致性
+      await this.userRepository.manager.transaction(
+        async (transactionalEntityManager) => {
+          // 互相设置为恋人
+          sender.lover = receiver;
+          receiver.lover = sender;
+          // 更新请求状态为已接受
+          request.status = LoverRequestStatus.已接受;
+
+          // 保存所有更改
+          await transactionalEntityManager.save(sender);
+          await transactionalEntityManager.save(receiver);
+          await transactionalEntityManager.save(request);
+        },
+      );
+    } else {
+      // 4. 如果拒绝请求，只需更新请求状态
+      request.status = LoverRequestStatus.已拒绝;
+      await this.loverRequestRepository.save(request);
+    }
+  }
+
+  // 获取用户的请求列表
+  async getLoverRequests(userUid: string) {
+    return this.loverRequestRepository.find({
+      where: [{ sender: { uid: userUid } }, { receiver: { uid: userUid } }],
+      relations: ['sender', 'receiver'],
+      order: { createdTime: 'DESC' },
+    });
   }
 
   async unbindLover(userUid: string): Promise<void> {

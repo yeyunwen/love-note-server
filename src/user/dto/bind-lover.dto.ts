@@ -6,6 +6,11 @@ export class BindLoverDto {
 }
 
 export class AcceptLoverDto {
-  @IsNotEmpty({ message: 'loverUid must not be empty' })
-  loverUid: string;
+  @IsNotEmpty({ message: 'requestId must not be empty' })
+  requestId: number;
+}
+
+export class RejectLoverDto {
+  @IsNotEmpty({ message: 'requestId must not be empty' })
+  requestId: number;
 }
