@@ -3,6 +3,7 @@ import { promisify } from 'node:util';
 import {
   BadRequestException,
   HttpException,
+  HttpStatus,
   Inject,
   Injectable,
 } from '@nestjs/common';
@@ -194,7 +195,7 @@ export class UserService {
     receiverUid: string,
   ): Promise<void> {
     if (senderUid === receiverUid) {
-      throw new HttpException('不能绑定自己', 400);
+      throw new HttpException('不能绑定自己', HttpStatus.BAD_REQUEST);
     }
 
     const [sender, receiver] = await Promise.all([
@@ -209,11 +210,11 @@ export class UserService {
     ]);
 
     if (!sender || !receiver) {
-      throw new HttpException('用户不存在', 400);
+      throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
     }
 
     if (sender.lover || receiver.lover) {
-      throw new HttpException('用户已有恋人', 400);
+      throw new HttpException('用户已有恋人', HttpStatus.BAD_REQUEST);
     }
 
     // 检查是否已经存在未处理的请求
@@ -237,12 +238,12 @@ export class UserService {
       if (existingRequest.sender.uid === senderUid) {
         throw new HttpException(
           '你已经向对方发送过绑定请求，请等待对方处理',
-          400,
+          HttpStatus.BAD_REQUEST,
         );
       } else {
         throw new HttpException(
           '对方已向你发送绑定请求，请先处理对方的请求',
-          400,
+          HttpStatus.BAD_REQUEST,
         );
       }
     }
@@ -277,7 +278,7 @@ export class UserService {
 
     // 2. 验证请求是否存在
     if (!request) {
-      throw new HttpException('请求不存在或已处理', 400);
+      throw new HttpException('请求不存在或已处理', HttpStatus.BAD_REQUEST);
     }
 
     // 3. 如果选择接受请求
@@ -295,7 +296,7 @@ export class UserService {
       ]);
 
       if (sender.lover || receiver.lover) {
-        throw new HttpException('用户已有恋人', 400);
+        throw new HttpException('用户已有恋人', HttpStatus.BAD_REQUEST);
       }
 
       // 3.2 使用事务来确保数据一致性
