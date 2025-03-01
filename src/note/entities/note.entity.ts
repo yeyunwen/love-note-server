@@ -24,6 +24,9 @@ export class Note {
   @ManyToOne(() => User)
   user: User;
 
+  @Column({ nullable: true, comment: '关系ID' })
+  relationshipId: string;
+
   @OneToMany(() => Image, (image) => image.note)
   images: Image[];
 

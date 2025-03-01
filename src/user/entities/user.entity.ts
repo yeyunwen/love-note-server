@@ -43,6 +43,9 @@ export class User {
   })
   gender: UserGender;
 
+  @Column({ nullable: true, comment: '恋人关系ID' })
+  relationshipId: string;
+
   @OneToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'lover_uid', referencedColumnName: 'uid' })
   lover: User;

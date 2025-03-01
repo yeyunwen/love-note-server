@@ -23,7 +23,8 @@
     "migration:create": "node scripts/create-migration.mjs",
     "migration:generate": "node scripts/generate-migration.mjs",
     "migration:run": "npm run typeorm -- migration:run -d ./dist/database/typeorm.config.js",
-    "migration:revert": "npm run typeorm -- migration:revert -d ./dist/database/typeorm.config.js"
+    "migration:revert": "npm run typeorm -- migration:revert -d ./dist/database/typeorm.config.js",
+    "generate-relationship-ids": "ts-node scripts/generate-relationship-ids.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -72,6 +73,7 @@
     "husky": "^9.1.7",
     "jest": "^29.5.0",
     "lint-staged": "^15.3.0",
+    "module-alias": "^2.2.3",
     "picocolors": "^1.1.1",
     "prettier": "^3.0.0",
     "source-map-support": "^0.5.21",

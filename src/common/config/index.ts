@@ -7,7 +7,7 @@ type Env = 'dev' | 'test' | 'prod';
 
 // 获取项目运行环境
 export const getEnv = (): Env => {
-  return process.env.RUNNING_ENV as Env;
+  return (process.env.RUNNING_ENV as Env) || 'dev';
 };
 
 export const isDev = getEnv() === 'dev';

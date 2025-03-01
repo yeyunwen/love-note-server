@@ -19,15 +19,16 @@ export class NoteController {
   }
 
   /**
-   * 分页获取用户笔记
+   * 分页获取该情侣笔记
    */
   @Get()
   findUserNotes(
-    @User() { userId }: JwtPayload,
+    @User() { uid }: JwtPayload,
     @Query() query: PaginationQueryDto,
   ) {
-    return this.noteService.findAllForUser(userId, query);
+    return this.noteService.findLoverNotes(uid, query);
   }
+
   /**
    * 获取笔记详情
    */

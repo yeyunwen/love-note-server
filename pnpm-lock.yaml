@@ -140,6 +140,9 @@ importers:
       lint-staged:
         specifier: ^15.3.0
         version: 15.3.0
+      module-alias:
+        specifier: ^2.2.3
+        version: 2.2.3
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1
@@ -4085,6 +4088,12 @@ packages:
       }
     engines: { node: '>=10' }
     hasBin: true
+
+  module-alias@2.2.3:
+    resolution:
+      {
+        integrity: sha512-23g5BFj4zdQL/b6tor7Ji+QY4pEfNH784BMslY9Qb0UnJWRAt+lQGLYmRaM0KDBwIG23ffEBELhZDP2rhi9f/Q==,
+      }
 
   ms@2.0.0:
     resolution:
@@ -8485,6 +8494,8 @@ snapshots:
       minimist: 1.2.8
 
   mkdirp@2.1.6: {}
+
+  module-alias@2.2.3: {}
 
   ms@2.0.0: {}
 

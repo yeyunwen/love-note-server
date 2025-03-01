@@ -27,7 +27,9 @@ export class UserService {
     UserRegisterType,
     (data: RegisterDataMap[UserRegisterType]) => Promise<User>
   >;
-
+  /**
+   * 生成用户ID
+   */
   static generateUid(): string {
     const uid = uuidv4();
     const numericUid = uid
@@ -38,20 +40,37 @@ export class UserService {
     return numericUid.slice(0, 12);
   }
 
+  /**
+   * 密码加密
+   */
   static async hashPassword(password: string) {
     const salt = randomBytes(16).toString('hex');
     const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
     return salt + ':' + derivedKey.toString('hex');
   }
+
+  /**
+   * 密码验证
+   */
   static async validatePassword(password: string, storedHash: string) {
     const [salt, hash] = storedHash.split(':');
     const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
     return derivedKey.toString('hex') === hash;
   }
 
+  /**
+   * 生成默认用户名
+   */
   private async generateDefaultUsername() {
     const randomNumber = Math.floor(Math.random() * 100000);
     return `user_${randomNumber}`;
+  }
+
+  /**
+   * 生成关系ID
+   */
+  private generateRelationshipId(uid1: string, uid2: string) {
+    return [uid1, uid2].sort().join('_');
   }
 
   constructor(
@@ -63,6 +82,9 @@ export class UserService {
     this.strategies = new Map([[UserRegisterType.邮箱, this.emailRegister]]);
   }
 
+  /**
+   * 注册
+   */
   async register(registerDto: RegisterDto) {
     const strategy = this.strategies.get(registerDto.type as UserRegisterType);
     if (!strategy) {
@@ -83,6 +105,9 @@ export class UserService {
     await strategy(data);
   }
 
+  /**
+   * 邮箱注册
+   */
   private emailRegister = async (
     data: RegisterDataMap[UserRegisterType.邮箱],
   ) => {
@@ -109,10 +134,16 @@ export class UserService {
     return savedUser;
   };
 
+  /**
+   * 根据邮箱查找用户
+   */
   async findByEmail(email: string) {
     return this.userRepository.findOne({ where: { email } });
   }
 
+  /**
+   * 邮箱验证
+   */
   async validateUserByEmail(email: string, password: string) {
     const user = await this.findByEmail(email);
     return user && (await UserService.validatePassword(password, user.password))
@@ -120,6 +151,9 @@ export class UserService {
       : null;
   }
 
+  /**
+   * 获取用户信息
+   */
   async getUserInfo(uid: string) {
     const user = await this.userRepository.findOne({
       where: { uid },
@@ -302,10 +336,21 @@ export class UserService {
       // 3.2 使用事务来确保数据一致性
       await this.userRepository.manager.transaction(
         async (transactionalEntityManager) => {
+          // 生成关系ID
+          const relationshipId = this.generateRelationshipId(
+            sender.uid,
+            receiver.uid,
+          );
+
+          // 设置双方的关系ID
+          sender.relationshipId = relationshipId;
+          receiver.relationshipId = relationshipId;
+
           // 互相设置为恋人
           sender.lover = receiver;
           receiver.lover = sender;
-          // 更新请求状态为已接受
+
+          // 更新请求状态
           request.status = LoverRequestStatus.已接受;
 
           // 保存所有更改
