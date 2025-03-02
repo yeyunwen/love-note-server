@@ -3,10 +3,10 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { Note } from './entities/note.entity';
-import { PaginationQueryDto } from '~/common/dto/pagination.dto';
 import { User } from '~/user/entities/user.entity';
 import { Image } from '~/note/entities/image.entity';
 import { In } from 'typeorm';
+import { FindNotesDto, NoteType } from './dto/find-notes.dto';
 
 @Injectable()
 export class NoteService {
@@ -16,6 +16,15 @@ export class NoteService {
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
   ) {}
+
+  private async loadImagesForNote(noteId: number) {
+    return this.noteRepository
+      .createQueryBuilder('note')
+      .relation(Note, 'images')
+      .of(noteId)
+      .loadMany()
+      .then((images) => images.sort((a, b) => a.order - b.order));
+  }
 
   async create(createNoteDto: CreateNoteDto & { userId: number }) {
     // 1. 检查用户是否已绑定恋人并获取relationshipId
@@ -50,45 +59,6 @@ export class NoteService {
     return this.findOne(savedNote.id);
   }
 
-  async findAllForUser(userId: number, query: PaginationQueryDto) {
-    // 先获取分页后的笔记
-    const [notes, total] = await this.noteRepository.findAndCount({
-      where: { user: { id: userId } },
-      relations: ['user'],
-      select: {
-        user: {
-          id: true,
-          username: true,
-          avatar: true,
-        },
-      },
-      order: { createdTime: 'DESC' },
-      skip: (query.page - 1) * query.limit,
-      take: query.limit,
-    });
-
-    // 为每个笔记加载其关联的图片，并按顺序排序
-    const notesWithImages = await Promise.all(
-      notes.map(async (note) => {
-        const images = await this.loadImagesForNote(note.id);
-        return {
-          ...note,
-          images,
-        };
-      }),
-    );
-
-    return {
-      items: notesWithImages,
-      meta: {
-        page: query.page,
-        limit: query.limit,
-        total,
-        totalPages: Math.ceil(total / query.limit),
-      },
-    };
-  }
-
   async findOne(id: number) {
     const note = await this.noteRepository.findOne({
       where: { id },
@@ -109,32 +79,47 @@ export class NoteService {
     return note;
   }
 
-  private async loadImagesForNote(noteId: number) {
-    return this.noteRepository
-      .createQueryBuilder('note')
-      .relation(Note, 'images')
-      .of(noteId)
-      .loadMany()
-      .then((images) => images.sort((a, b) => a.order - b.order));
-  }
-
-  async findLoverNotes(userUid: string, query: PaginationQueryDto) {
-    // 1. 获取用户和其恋人信息
+  async findNotes(userUid: string, userId: number, findNotesDto: FindNotesDto) {
+    // 1. 获取用户信息
     const user = await this.userRepository.findOne({
       where: { uid: userUid },
       relations: ['lover'],
     });
 
-    if (!user.lover) {
+    if (!user.relationshipId) {
       throw new HttpException('您还没有绑定恋人', HttpStatus.BAD_REQUEST);
     }
 
-    // 2. 生成关系ID
-    const relationshipId = [user.uid, user.lover.uid].sort().join('_');
+    let whereCondition: any;
 
-    // 3. 查询关系下的所有笔记
+    // 2. 根据类型构建查询条件
+    switch (findNotesDto.type) {
+      case NoteType.全部:
+        // 查询该关系下的所有笔记
+        whereCondition = { relationshipId: user.relationshipId };
+        break;
+      case NoteType.我的:
+        // 只查询自己的笔记
+        whereCondition = {
+          relationshipId: user.relationshipId,
+          user: { id: userId },
+        };
+        break;
+      case NoteType.恋人:
+        // 只查询恋人的笔记
+        if (!user.lover) {
+          throw new HttpException('您还没有绑定恋人', HttpStatus.BAD_REQUEST);
+        }
+        whereCondition = {
+          relationshipId: user.relationshipId,
+          user: { id: user.lover.id },
+        };
+        break;
+    }
+
+    // 3. 执行查询
     const [notes, total] = await this.noteRepository.findAndCount({
-      where: { relationshipId },
+      where: whereCondition,
       relations: ['user'],
       select: {
         user: {
@@ -144,8 +129,8 @@ export class NoteService {
         },
       },
       order: { updatedTime: 'DESC' },
-      skip: (query.page - 1) * query.limit,
-      take: query.limit,
+      skip: (findNotesDto.page - 1) * findNotesDto.limit,
+      take: findNotesDto.limit,
     });
 
     // 4. 为每个笔记加载图片
@@ -162,10 +147,10 @@ export class NoteService {
     return {
       items: notesWithImages,
       meta: {
-        page: query.page,
-        limit: query.limit,
+        page: findNotesDto.page,
+        limit: findNotesDto.limit,
         total,
-        totalPages: Math.ceil(total / query.limit),
+        totalPages: Math.ceil(total / findNotesDto.limit),
       },
     };
   }
