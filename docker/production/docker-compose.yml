@@ -1,10 +1,10 @@
 version: '3.8'
-name: love-note-backend
+name: love-note-server
 
 services:
   api:
-    image: love-note-server:latest
-    container_name: love-note-api
+    image: ${DOCKER_REGISTRY}/${ALIYUN_NAMESPACE}/love-note-backend:latest
+    container_name: love-note-backend
     ports:
       - '9315:9315' # 直接暴露 API 端口
     volumes:
