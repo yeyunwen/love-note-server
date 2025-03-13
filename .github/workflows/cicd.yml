@@ -114,7 +114,13 @@ jobs:
             # 启动容器
             echo "启动容器..."
             cd /root/app/love-note/backend && \
-            docker-compose pull && \
-            docker-compose up -d
 
+            # 确保网络存在
+            docker network create love-note-network || true && \
+
+            # 拉取镜像
+            docker-compose pull && \
+
+            # 启动容器
+            docker-compose up -d
             echo "✅ 部署完成"
