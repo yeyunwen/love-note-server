@@ -1,0 +1,40 @@
+version: '3.8'
+name: love-note-backend
+
+services:
+  api:
+    image: love-note-server:latest
+    container_name: love-note-api
+    ports:
+      - '9315:9315' # 直接暴露 API 端口
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - love-note-network
+    restart: unless-stopped
+
+  mysql:
+    image: 'mysql:8.0.30'
+    ports:
+      - '${MYSQL_PORT}:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - TZ=${WORKSPACE_TIMEZONE}
+    volumes:
+      - ${MYSQL_DATA_PATH}:/var/lib/mysql:rw
+      - ${MYSQL_CNF_PATH}:/etc/mysql/conf.d/my.cnf:rw
+    networks:
+      - love-note-network
+  redis:
+    image: 'redis:latest'
+    ports:
+      - '${REDIS_PORT}:6379'
+    networks:
+      - love-note-network
+
+networks:
+  love-note-network:
+    external: true

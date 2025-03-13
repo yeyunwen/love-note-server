@@ -3,7 +3,7 @@ SERVER_CONFIG:
 MYSQL_CONFIG:
   USER: root
   PASSWORD: '123456'
-  HOST: 127.0.0.1
+  HOST: mysql
   PORT: 3306
   DATABASE: love-note
 AUTH_CONFIG:
@@ -13,7 +13,7 @@ EMAIL_CONFIG:
   USER: 'user-email@xx.com'
   PASS: 'your-email-password'
 REDIS_CONFIG:
-  HOST: 127.0.0.1
+  HOST: redis
   PORT: 6379
 UPLOAD_CONFIG:
   MAX_FILE_SIZE: 10 # MB
