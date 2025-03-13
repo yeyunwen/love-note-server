@@ -72,7 +72,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
-      - uses: actions/checkout@v4 # 需要检出代码来获取 docker 配置文件
+      - uses: actions/checkout@v4
 
       - name: Copy files to production
         uses: appleboy/scp-action@master
@@ -80,11 +80,12 @@ jobs:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
-          source: 'docker/production/*'
-          target: 'root/app/love-note/backend'
-          strip_components: 1
+          source: './docker/production/*' # 明确指定 production 目录下的文件
+          target: '/root/app/love-note/backend' # 使用绝对路径
+          strip_components: 2 # 因为路径多了一层 production，所以这里改为 2
 
       - name: Deploy to production
+        if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.PROD_HOST }}
