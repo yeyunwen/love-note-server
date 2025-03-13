@@ -92,6 +92,6 @@ jobs:
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
           script: |
-            cd root/app/love-note/backend && \
+            cd /root/app/love-note/backend && \
             docker-compose pull && \
             docker-compose up -d
