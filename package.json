@@ -22,9 +22,10 @@
     "typeorm": "cross-env RUNNING_ENV=dev typeorm-ts-node-commonjs",
     "migration:create": "node scripts/create-migration.mjs",
     "migration:generate": "node scripts/generate-migration.mjs",
-    "migration:run": "npm run typeorm -- migration:run -d ./dist/database/typeorm.config.js",
+    "migration:run": "typeorm-ts-node-commonjs migration:run -d ./dist/database/typeorm.config.js",
     "migration:revert": "npm run typeorm -- migration:revert -d ./dist/database/typeorm.config.js",
-    "generate-relationship-ids": "ts-node scripts/generate-relationship-ids.ts"
+    "generate-relationship-ids": "ts-node scripts/generate-relationship-ids.ts",
+    "update-test-user-password": "ts-node scripts/update-test-user-password.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

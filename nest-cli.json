@@ -12,6 +12,12 @@
           "introspectComments": true
         }
       }
+    ],
+    "assets": [
+      {
+        "include": "database/migrations/*.sql",
+        "outDir": "dist"
+      }
     ]
   },
   "generateOptions": {

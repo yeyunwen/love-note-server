@@ -7,6 +7,20 @@ services:
     container_name: love-note-backend
     ports:
       - '${SERVER_PORT}:9315' # 直接暴露 API 端口
+    environment:
+      - SERVER_PORT=${SERVER_PORT}
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PORT=${MYSQL_PORT}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - RUNNING_ENV=prod
     volumes:
       - ./uploads:/app/uploads
     depends_on:

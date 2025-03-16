@@ -13,7 +13,7 @@ export const getEnv = (): Env => {
 export const isDev = getEnv() === 'dev';
 
 // 读取项目配置
-const getConfig = () => {
+const getFileConfig = () => {
   const env = getEnv();
   const envPath = path.join(process.cwd(), `./.config/.${env}.yaml`);
   const localPath = path.join(process.cwd(), `./.config/.${env}.local.yaml`);
@@ -28,42 +28,42 @@ const getConfig = () => {
   return config as AppConfig;
 };
 
-const config = getConfig();
+const fileConfig = getFileConfig();
 
 // 全局配置 为了部署到线上的时候，可以获取到.env 文件中的配置
 const GLOBAL_CONFIG: AppConfig = {
   SERVER_CONFIG: {
-    PORT: Number(process.env.SERVER_PORT) || config.SERVER_CONFIG.PORT,
+    PORT: Number(process.env.SERVER_PORT) || fileConfig.SERVER_CONFIG.PORT,
   },
   MYSQL_CONFIG: {
-    USER: process.env.MYSQL_USER || config.MYSQL_CONFIG.USER,
-    PASSWORD: process.env.MYSQL_PASSWORD || config.MYSQL_CONFIG.PASSWORD,
-    HOST: process.env.MYSQL_HOST || config.MYSQL_CONFIG.HOST,
-    PORT: Number(process.env.MYSQL_PORT) || config.MYSQL_CONFIG.PORT,
-    DATABASE: process.env.MYSQL_DATABASE || config.MYSQL_CONFIG.DATABASE,
+    USER: process.env.MYSQL_USER || fileConfig.MYSQL_CONFIG.USER,
+    PASSWORD: process.env.MYSQL_PASSWORD || fileConfig.MYSQL_CONFIG.PASSWORD,
+    HOST: process.env.MYSQL_HOST || fileConfig.MYSQL_CONFIG.HOST,
+    PORT: Number(process.env.MYSQL_PORT) || fileConfig.MYSQL_CONFIG.PORT,
+    DATABASE: process.env.MYSQL_DATABASE || fileConfig.MYSQL_CONFIG.DATABASE,
   },
   AUTH_CONFIG: {
-    JWT_SECRET: process.env.JWT_SECRET || config.AUTH_CONFIG.JWT_SECRET,
+    JWT_SECRET: process.env.JWT_SECRET || fileConfig.AUTH_CONFIG.JWT_SECRET,
     JWT_EXPIRES_IN:
-      process.env.JWT_EXPIRES_IN || config.AUTH_CONFIG.JWT_EXPIRES_IN,
+      process.env.JWT_EXPIRES_IN || fileConfig.AUTH_CONFIG.JWT_EXPIRES_IN,
   },
   EMAIL_CONFIG: {
-    USER: process.env.EMAIL_USER || config.EMAIL_CONFIG.USER,
-    PASS: process.env.EMAIL_PASS || config.EMAIL_CONFIG.PASS,
+    USER: process.env.EMAIL_USER || fileConfig.EMAIL_CONFIG.USER,
+    PASS: process.env.EMAIL_PASS || fileConfig.EMAIL_CONFIG.PASS,
   },
   REDIS_CONFIG: {
-    HOST: process.env.REDIS_HOST || config.REDIS_CONFIG.HOST,
-    PORT: Number(process.env.REDIS_PORT) || config.REDIS_CONFIG.PORT,
+    HOST: process.env.REDIS_HOST || fileConfig.REDIS_CONFIG.HOST,
+    PORT: Number(process.env.REDIS_PORT) || fileConfig.REDIS_CONFIG.PORT,
   },
   UPLOAD_CONFIG: {
     MAX_FILE_SIZE:
       Number(process.env.UPLOAD_MAX_FILE_SIZE) ||
-      config.UPLOAD_CONFIG.MAX_FILE_SIZE,
+      fileConfig.UPLOAD_CONFIG.MAX_FILE_SIZE,
     MAX_FILE_COUNT:
       Number(process.env.UPLOAD_MAX_FILE_COUNT) ||
-      config.UPLOAD_CONFIG.MAX_FILE_COUNT,
+      fileConfig.UPLOAD_CONFIG.MAX_FILE_COUNT,
     DESTINATION:
-      process.env.UPLOAD_DESTINATION || config.UPLOAD_CONFIG.DESTINATION,
+      process.env.UPLOAD_DESTINATION || fileConfig.UPLOAD_CONFIG.DESTINATION,
   },
 };
 
