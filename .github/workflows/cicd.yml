@@ -62,8 +62,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/love-note-server:latest
-            ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/love-note-server:${{ github.sha }}
+            ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/love-note-backend:latest
+            ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/love-note-backend:${{ github.sha }}
 
   deploy:
     name: Deploy to Production
