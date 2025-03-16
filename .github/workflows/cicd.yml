@@ -174,7 +174,7 @@ jobs:
             # 等待 MySQL 完全启动
             echo "等待 MySQL 启动..."
             for i in {1..30}; do
-              if docker-compose exec -T mysql mysqladmin ping -h localhost -u root -p${{ secrets.MYSQL_PASSWORD }}  --silent; then
+              if docker-compose exec -T mysql mysqladmin ping -h localhost -u root -p${{ secrets.MYSQL_PASSWORD }} --silent; then
                 echo "MySQL 已启动"
                 break
               fi
@@ -182,7 +182,12 @@ jobs:
               sleep 2
             done
 
+            # 创建数据库（如果不存在）
+            echo "创建数据库..."
+            docker-compose exec -T mysql mysql -u root -p${{ secrets.MYSQL_PASSWORD }} -e "CREATE DATABASE IF NOT EXISTS ${{ secrets.MYSQL_DATABASE }};" || { echo "创建数据库失败，终止部署"; exit 1; }
+
             # 运行迁移
+            echo "运行数据库迁移..."
             docker run --rm \
               --network love-note-network \
               -e MYSQL_HOST=${{ secrets.MYSQL_HOST }} \
