@@ -5,7 +5,7 @@ import path from 'path';
 export class Init1731955927328 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // 读取 SQL 文件
-    const sqlFilePath = path.join(__dirname, 'love-note.sql');
+    const sqlFilePath = path.join(__dirname, 'love_note.sql');
     const sqlContent = fs.readFileSync(sqlFilePath, 'utf8');
 
     // 分割 SQL 语句并执行
@@ -27,6 +27,6 @@ export class Init1731955927328 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('DROP DATABASE love-note;');
+    await queryRunner.query('DROP DATABASE love_note;');
   }
 }

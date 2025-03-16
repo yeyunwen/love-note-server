@@ -1,11 +1,11 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : love-note-server
+ Source Server         : love_note_server
  Source Server Type    : MySQL
  Source Server Version : 80030 (8.0.30)
  Source Host           : localhost:3306
- Source Schema         : love-note
+ Source Schema         : love_note
 
  Target Server Type    : MySQL
  Target Server Version : 80030 (8.0.30)
