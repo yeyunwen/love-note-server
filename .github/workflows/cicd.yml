@@ -163,12 +163,24 @@ jobs:
 
             EOF
 
-            # 先启动 MySQL 容器
-            docker-compose up -d mysql && \
+            # 停止并删除现有的 MySQL 容器，但保留数据
+            echo "停止并删除现有的 MySQL 容器..."
+            docker-compose rm -sf mysql
+
+            # 使用新的环境变量重新创建 MySQL 容器
+            echo "使用新的环境变量重新创建 MySQL 容器..."
+            docker-compose up -d mysql
 
             # 等待 MySQL 完全启动
-            echo "Waiting for MySQL to start..." && \
-            sleep 20 && \
+            echo "等待 MySQL 启动..."
+            for i in {1..30}; do
+              if docker-compose exec -T mysql mysqladmin ping -h localhost -u root -p${{ secrets.MYSQL_PASSWORD }} --silent; then
+                echo "MySQL 已启动"
+                break
+              fi
+              echo "等待 MySQL 启动... $i/30"
+              sleep 2
+            done
 
             # 运行迁移
             docker run --rm \
