@@ -40,6 +40,7 @@ RUN pnpm install
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/.config ./.config
 COPY --from=builder /app/uploads ./uploads
+COPY --from=builder /app/scripts ./scripts
 
 # 创建上传文件目录并设置权限
 RUN mkdir -p uploads/note-image && \

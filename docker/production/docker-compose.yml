@@ -6,7 +6,7 @@ services:
     image: ${DOCKER_REGISTRY}/${ALIYUN_NAMESPACE}/love-note-backend:latest
     container_name: love-note-backend
     ports:
-      - '9315:9315' # 直接暴露 API 端口
+      - '${SERVER_PORT}:9315' # 直接暴露 API 端口
     volumes:
       - ./uploads:/app/uploads
     depends_on:
@@ -21,7 +21,7 @@ services:
     ports:
       - '${MYSQL_PORT}:3306'
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
       - TZ=${WORKSPACE_TIMEZONE}
     volumes:
       - ${MYSQL_DATA_PATH}:/var/lib/mysql:rw

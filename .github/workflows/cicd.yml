@@ -96,6 +96,8 @@ jobs:
             set -e
 
             echo "开始部署流程..."
+            # 先进入项目目录
+            cd /root/app/love-note/backend && \
 
             # 登录到阿里云容器服务
             echo "正在登录阿里云容器服务..."
@@ -111,12 +113,76 @@ jobs:
               exit 1
             }
 
-            # 启动容器
-            echo "启动容器..."
-            cd /root/app/love-note/backend && \
-
             # 确保网络存在
             docker network create love-note-network || true && \
+
+            # 创建 .env 文件
+            echo "创建 .env 文件..."
+            cat > /root/app/love-note/backend/.env << EOF
+            # Docker Registry
+            DOCKER_REGISTRY=${{ secrets.DOCKER_REGISTRY }}
+            ALIYUN_NAMESPACE=${{ secrets.ALIYUN_NAMESPACE }}
+
+            # All volumes driver
+            VOLUMES_DRIVER=${{ secrets.VOLUMES_DRIVER }}
+
+            # All Networks driver
+            NETWORKS_DRIVER=${{ secrets.NETWORKS_DRIVER }}
+
+            # 时区
+            WORKSPACE_TIMEZONE=${{ secrets.WORKSPACE_TIMEZONE }}
+
+            # Server
+            SERVER_PORT=${{ secrets.SERVER_PORT }}
+
+            # MySQL
+            MYSQL_USER=${{ secrets.MYSQL_USER }}
+            MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+            MYSQL_HOST=${{ secrets.MYSQL_HOST }}
+            MYSQL_PORT=${{ secrets.MYSQL_PORT }}
+            MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
+            MYSQL_DATA_PATH=${{ secrets.MYSQL_DATA_PATH }}
+            MYSQL_CNF_PATH=${{ secrets.MYSQL_CNF_PATH }}
+
+            # Redis
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
+
+            # JWT
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}
+
+            # Email
+            EMAIL_USER=${{ secrets.EMAIL_USER }}
+            EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+
+            # Upload
+            UPLOAD_MAX_FILE_SIZE=10
+            UPLOAD_MAX_FILE_COUNT=9
+            UPLOAD_DESTINATION=uploads
+
+            EOF
+
+            # 先启动 MySQL 容器
+            docker-compose up -d mysql && \
+
+            # 等待 MySQL 完全启动
+            echo "Waiting for MySQL to start..." && \
+            sleep 20 && \
+
+            # 运行迁移
+            docker run --rm \
+              --network love-note-network \
+              -e MYSQL_HOST=${{ secrets.MYSQL_HOST }} \
+              -e MYSQL_PORT=${{ secrets.MYSQL_PORT }} \
+              -e MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }} \
+              -e MYSQL_USER=${{ secrets.MYSQL_USER }} \
+              -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+              ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/love-note-backend:latest \
+              npm run migration:run && \
+
+            # 启动容器
+            echo "启动容器..."
 
             # 拉取镜像
             docker-compose pull && \
