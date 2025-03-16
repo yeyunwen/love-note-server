@@ -19,7 +19,6 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prepare": "husky",
-    "typeorm": "cross-env RUNNING_ENV=dev typeorm-ts-node-commonjs",
     "migration:create": "node scripts/create-migration.mjs",
     "migration:generate": "node scripts/generate-migration.mjs",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d ./dist/database/typeorm.config.js",

@@ -179,7 +179,7 @@ jobs:
               -e MYSQL_USER=${{ secrets.MYSQL_USER }} \
               -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
               ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.ALIYUN_NAMESPACE }}/love-note-backend:latest \
-              npm run migration:run && \
+              pnpm migration:run && \
 
             # 启动容器
             echo "启动容器..."
