@@ -174,13 +174,23 @@ jobs:
             # 等待 MySQL 完全启动
             echo "等待 MySQL 启动..."
             for i in {1..30}; do
-              if docker-compose exec -T mysql mysqladmin ping -h localhost -u root -p${{ secrets.MYSQL_PASSWORD }} --silent; then
+              if docker-compose exec -T mysql mysqladmin ping -h localhost -u root -p当前有效的密码 --silent; then
                 echo "MySQL 已启动"
                 break
               fi
               echo "等待 MySQL 启动... $i/30"
               sleep 2
             done
+
+            # 尝试更新 MySQL 密码（如果需要）
+            echo "尝试更新 MySQL 密码..."
+            if docker-compose exec -T mysql mysql -u root -p当前有效的密码 -e "ALTER USER 'root'@'%' IDENTIFIED BY '${{ secrets.MYSQL_PASSWORD }}'; FLUSH PRIVILEGES;" >/dev/null 2>&1; then
+              echo "密码已更新为新密码"
+              CURRENT_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+            else
+              echo "无法更新密码，继续使用当前密码"
+              CURRENT_PASSWORD=当前有效的密码
+            fi
 
             # 运行迁移
             docker run --rm \
