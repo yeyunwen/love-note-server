@@ -174,7 +174,7 @@ jobs:
             # 等待 MySQL 完全启动
             echo "等待 MySQL 启动..."
             for i in {1..30}; do
-              if docker-compose exec -T mysql mysqladmin ping -h localhost -u root -p ${{ secrets.MYSQL_PASSWORD }}  --silent; then
+              if docker-compose exec -T mysql mysqladmin ping -h localhost -u root -p${{ secrets.MYSQL_PASSWORD }}  --silent; then
                 echo "MySQL 已启动"
                 break
               fi
